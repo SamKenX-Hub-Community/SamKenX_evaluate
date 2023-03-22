@@ -569,8 +569,8 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             self.selected_feature_format = self._infer_feature_from_example(example)
             self._init_writer()
         try:
-            self._enforce_nested_string_type(self.info.features, example)
-            example = self.info.features.encode_example(example)
+            self._enforce_nested_string_type(self.selected_feature_format, example)
+            example = self.selected_feature_format.encode_example(example)
             self.writer.write(example)
         except (pa.ArrowInvalid, TypeError):
             error_msg = (
@@ -972,7 +972,6 @@ class CombinedEvaluations:
 
         for evaluation_module in self.evaluation_modules:
             batch = {"predictions": predictions, "references": references, **kwargs}
-            batch = {input_name: batch[input_name] for input_name in evaluation_module._feature_names()}
             results.append(evaluation_module.compute(**batch))
 
         return self._merge_results(results)
